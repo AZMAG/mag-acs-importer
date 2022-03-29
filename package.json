@@ -1,0 +1,18 @@
+{
+  "name": "acs_importer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "mag-node-sql": "^1.0.22",
+    "papaparse": "^5.3.1",
+    "xlsx": "^0.17.0"
+  }
+}
