@@ -12,7 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "axios": "^0.21.1",
-    "mag-node-sql": "^1.0.22",
+    "mag-node-sql": "^1.0.23",
     "papaparse": "^5.3.1",
     "xlsx": "^0.17.0"
   }

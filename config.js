@@ -1,6 +1,6 @@
 module.exports = {
-  year: 2020,
-  excelFile: 'I:\\Data\\ACS_2020\\MAG_TableList.xlsx',
-  outputDatabase: 'ACS2020',
+  year: 2021,
+  excelFile: 'I:\\Data\\ACS_misc\\MAG_ACS_TableDownloadList.xlsx',
+  outputDatabase: 'ACS2021',
   chunkSize: 10000,
 };

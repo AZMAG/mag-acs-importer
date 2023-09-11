@@ -3,8 +3,7 @@ const axios = require('axios');
 const Papa = require('papaparse');
 const MagSQL = require('mag-node-sql');
 const sql = new MagSQL();
-
-const censusWebsiteRoot = `https://www2.census.gov/programs-surveys/acs/summary_file/${year}/prototype`;
+const censusWebsiteRoot = `https://www2.census.gov/programs-surveys/acs/summary_file/${year}/table-based-SF/data/`;
 const oneYrPrefix = '1YRData/acsdt1y';
 const fiveYrPrefix = '5YRData/acsdt5y';
 
@@ -24,15 +23,20 @@ async function writeToSql(data, options) {
   return true;
 }
 
+async function downloadTableShells() {
+  //I:\Data\ACS_2021\ACS2021_5yr\Documentation\ACS21_5yr_TableShells.xlsx
+}
+
 async function getGeoTableByYear(yr) {
-  const fiveYrUrl = `${censusWebsiteRoot}/Geos${year}${yr}YR.csv`;
-  const res = await axios.get(fiveYrUrl);
+  const url = `https://www2.census.gov/programs-surveys/acs/summary_file/${year}/table-based-SF/documentation/Geos${year}${5}YR.txt`;
+  const res = await axios.get(url);
   let { data } = Papa.parse(res.data, { header: true });
   data = data
-    .filter((row) => row['GEOID'])
+    .filter((row) => row['GEO_ID'])
     .map((row) => {
-      if (row['GEOID']) {
-        row['GEOID10'] = row['GEOID'].split('US')[1];
+      if (row['GEO_ID']) {
+        row['GEOID'] = row['GEO_ID'];
+        row['GEOID20'] = row['GEO_ID'].split('US')[1];
         return row;
       }
     });
@@ -82,6 +86,14 @@ function processData(res) {
   return dataRows;
 }
 
+async function checkTableExists(tblName) {
+  let res = await sql.RunQuery(
+    `IF OBJECT_ID('${tblName}', 'U') IS NOT NULL select 1 as a ELSE SELECT 0`
+  );
+  let val = res.recordset[0]['a'];
+  return val ? true : false;
+}
+
 async function getTableColumnNames(tableId) {
   const { recordset } = await sql.RunQuery(
     `Select top 0 * from ${outputDatabase}.dbo.${tableId}`
@@ -109,7 +121,7 @@ async function createJoinedViewByYear(tables, yr) {
     const selectFields = await getTableColumnNames(tableId);
     selectTerms.push(` ${selectFields.join(', ')}`);
     joinTerms.push(
-      `LEFT JOIN ${fullTableName} ON ${fullTableName}.GEO_ID = ${geoTableName}.DADSID`
+      `LEFT JOIN ${fullTableName} ON ${fullTableName}.GEO_ID = ${geoTableName}.GEO_ID`
     );
   }
 
@@ -125,7 +137,6 @@ async function createJoinedViewByYear(tables, yr) {
       FROM ${geoTableName}
       ${joinTerms.join(' ')}
   `;
-  console.log(query);
   await sql.RunQuery(query);
   return;
 }
@@ -137,4 +148,5 @@ module.exports = {
   get1yrGeoTable,
   createJoinedViewByYear,
   writeToSql,
+  checkTableExists,
 };
